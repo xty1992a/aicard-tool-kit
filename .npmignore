@@ -1,0 +1,8 @@
+example
+.rollup.cache
+config
+node_modules
+src
+.idea
+.vscode
+.nvmrc
