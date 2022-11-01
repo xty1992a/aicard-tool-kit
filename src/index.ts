@@ -293,7 +293,7 @@ export class AistoreToolKit {
 
   /**
    * @description 要求用户订阅消息
-   * @param{Omit<RequestSubscribeMessage, 'type'>} params 授权参数,必须提供模板消息id,注意，已订阅的消息将被过滤
+   * @param{Omit<RequestSubscribeMessage, 'type'>} params 授权参数,必须提供模板消息id,最多3条
    * @param{RouteConfig} config 路由配置
    * @return void 成功回跳后ticket更新
    * */

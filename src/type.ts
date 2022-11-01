@@ -41,6 +41,16 @@ export type AuthLocation = AuthItem & {
   callbackUrl: string
 }
 
+
+export interface SubscribeMessagePayload {
+  /**
+   * 模板消息id，最多3条
+   * */
+  msg_ids: string[]
+  /** 上报的消息类型,1:新房上架，2:活动直播提醒 */
+  report_type: 1 | 2
+}
+
 /**
  * 模板消息订阅参数
  * payload.msg_ids必传
@@ -48,11 +58,7 @@ export type AuthLocation = AuthItem & {
 export type RequestSubscribeMessage = AuthItem & {
   type: AuthType.GET_NEWS_SUBSCRIBE,
   callbackUrl: string
-  payload: {
-    msg_ids: string[]
-    /** 上报的消息类型,1:新房上架，2:活动直播提醒 */
-    report_type: 1 | 2
-  }
+  payload: SubscribeMessagePayload
 }
 
 export type MultiAuth = {
