@@ -1,6 +1,6 @@
 import {URLParams, toSearch, toUrlString, ensureUrlDecoded} from "./url-params";
 import {AuthType, YD_ATTRIBUTE} from './type'
-import type {RequestSubscribeMessage, AuthItem, AuthPhone, AuthLocation, MultiAuth, AuthUserInfo, PageChatOption, PageH5Option, PageProjectOption, PageProjectDetailOption, RouterOption, RouteConfig, PaymentParams, SharePayload} from './type'
+import type {RequestSubscribeMessage, AuthItem, AuthPhone, AuthLocation, MultiAuth, AuthUserInfo, PageChatOption, PageH5Option, PageProjectOption, PageProjectDetailOption, RouterOption, RouteConfig, PaymentParams, SharePayload, TTrackCustomParams} from './type'
 
 export * from './type'
 
@@ -218,7 +218,7 @@ export class AistoreToolKit {
    * @param{SharePayload} params 分享参数
    * */
   updateShare(params: SharePayload) {
-    const {url, imageUrl, params: _params, title, path, authConfig} = params
+    const {url, imageUrl, params: _params, title, path, authConfig, trackCustomParams} = params
     this.postMessage({
       type: 'share',
       payload: {
@@ -227,6 +227,7 @@ export class AistoreToolKit {
         title,
         path,
         params: _params,
+        track_custom_params: trackCustomParams,
         tc_id: this.tcId,
         auth_config: authConfig && toUrlString({
           auth_list: authConfig.authList,
@@ -245,13 +246,14 @@ export class AistoreToolKit {
    * @return void 成功回跳后ticket更新
    * */
   getUserInfo(params: Omit<AuthUserInfo, 'type'>, config: RouteConfig = {redirect: false}) {
-    const {callbackUrl, ...option} = params
+    const {callbackUrl, trackCustomParams, ...option} = params
 
     this.doAuth({
       authList: [{
         type: AuthType.GET_USER_INFO,
         ...option
       }],
+      trackCustomParams,
       callbackUrl
     }, config);
   }
@@ -263,13 +265,14 @@ export class AistoreToolKit {
    * @return void 成功回跳后ticket更新
    * */
   getPhoneNumber(params: Omit<AuthPhone, 'type'>, config: RouteConfig = {redirect: false}) {
-    const {callbackUrl, ...option} = params
+    const {callbackUrl, trackCustomParams,...option} = params
 
     this.doAuth({
       authList: [{
         type: AuthType.GET_PHONE_NUMBER,
         ...option
       }],
+      trackCustomParams,
       callbackUrl
     });
   }
@@ -280,13 +283,14 @@ export class AistoreToolKit {
    * @return void 成功回跳后ticket更新
    * */
   getLocation(params: Omit<AuthLocation, 'type'>, config: RouteConfig = {redirect: false}) {
-    const {callbackUrl, ...option} = params
+    const {callbackUrl, trackCustomParams, ...option} = params
 
     this.doAuth({
       authList: [{
         type: AuthType.GET_LOCATION,
         ...option
       }],
+      trackCustomParams,
       callbackUrl
     });
   }
@@ -298,12 +302,13 @@ export class AistoreToolKit {
    * @return void 成功回跳后ticket更新
    * */
   requestSubscribeMessage(params: Omit<RequestSubscribeMessage, 'type'>, config: RouteConfig = {redirect: false}) {
-    const {callbackUrl, ...option} = params
+    const {callbackUrl, trackCustomParams, ...option} = params
     this.doAuth({
       authList: [{
         type: AuthType.GET_NEWS_SUBSCRIBE,
         ...option
       }],
+      trackCustomParams,
       callbackUrl
     });
   }
@@ -321,13 +326,14 @@ export class AistoreToolKit {
   /**
    * @description 底层授权方法
    * */
-  protected doAuth(option: { authList: AuthItem[], callbackUrl: string }, config: RouteConfig = {redirect: false}) {
+  protected doAuth(option: { authList: AuthItem[], callbackUrl: string, trackCustomParams?: TTrackCustomParams }, config: RouteConfig = {redirect: false}) {
     this.goTo({
       path: '/subpackages/independent/bind_user_msg/h5_ability/index',
       params: {
         // 转为snake_case
         auth_list: option.authList.map(it => ({...it, required: Boolean(it.required)})),
-        callback_url: ensureUrlDecoded(option.callbackUrl)
+        callback_url: ensureUrlDecoded(option.callbackUrl),
+        track_custom_params: option.trackCustomParams
       }
     }, config)
   }
