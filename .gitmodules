@@ -1,0 +1,6 @@
+[submodule "example/aistore-tool-sdk-h5"]
+	path = example/aistore-tool-sdk-h5
+	url = git@git.myscrm.cn:2c-frontend/aistore-tool-sdk-h5.git
+[submodule "example/bff-aistore-tool-sdk"]
+	path = example/bff-aistore-tool-sdk
+	url = git@git.myscrm.cn:2c-frontend/bff-aistore-tool-sdk.git
