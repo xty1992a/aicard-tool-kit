@@ -22,23 +22,35 @@ export interface AuthItem {
   payload?: Record<string, Many<string | number>>
 }
 
-export type AuthPhone = AuthItem & {
-  type: AuthType.GET_PHONE_NUMBER,
+/** 上报事件自定义参数 */
+export type TTrackCustomParams = {
+  /** 常规情况建议填充 对应业务组 APP_ID, 需要保证唯一 */
+  custom_params_id: string
+  /** 自定义字段, 建议使用 JSON 字符串 */
+  custom_params_value: string
+}
+
+export type CommonPayload = {
+  /** 回调链接 */
   callbackUrl: string
+  /** 事件上报自定义参数, 这参数会设置到云店服务端事件 l 字段内的 ext 字段, 目前仅支持 50320001 */
+  trackCustomParams?: TTrackCustomParams
+}
+
+export type AuthPhone = CommonPayload & AuthItem & {
+  type: AuthType.GET_PHONE_NUMBER,
   payload?: {
     /** 留电前，混入到entry_params的参数（此字段为云店内部字段） */
     entry_params: Record<string, string>
   }
 }
 
-export type AuthUserInfo = AuthItem & {
-  type: AuthType.GET_USER_INFO,
-  callbackUrl: string
+export type AuthUserInfo = CommonPayload & AuthItem & {
+  type: AuthType.GET_USER_INFO
 }
 
-export type AuthLocation = AuthItem & {
-  type: AuthType.GET_LOCATION,
-  callbackUrl: string
+export type AuthLocation = CommonPayload & AuthItem & {
+  type: AuthType.GET_LOCATION
 }
 
 
@@ -55,14 +67,13 @@ export interface SubscribeMessagePayload {
  * 模板消息订阅参数
  * payload.msg_ids必传
  * */
-export type RequestSubscribeMessage = AuthItem & {
+export type RequestSubscribeMessage = CommonPayload & AuthItem & {
   type: AuthType.GET_NEWS_SUBSCRIBE,
   callbackUrl: string
   payload: SubscribeMessagePayload
 }
 
-export type MultiAuth = {
-  callbackUrl: string
+export type MultiAuth = CommonPayload &  {
   authList: Pick<AuthItem, 'type' | 'required' | 'payload'>[]
 }
 
@@ -81,6 +92,9 @@ export interface SharePayload {
 
   /** 小程序参数 */
   params?: Record<string, any>
+
+  /** 事件上报自定义参数, 这两个参数会展开到云店客户端事件 l 字段内, 目前仅支持 1002 */
+  trackCustomParams?: TTrackCustomParams
 
   /** 预授权参数，用户会先进入授权页完成授权后才进入url */
   authConfig?: {
