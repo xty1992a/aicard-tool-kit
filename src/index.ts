@@ -1,6 +1,6 @@
 import {URLParams, toSearch, toUrlString, ensureUrlDecoded} from "./url-params";
 import {AuthType, YD_ATTRIBUTE} from './type'
-import type {RequestSubscribeMessage, AuthItem, AuthPhone, AuthLocation, MultiAuth, AuthUserInfo, PageChatOption, PageH5Option, PageProjectOption, PageProjectDetailOption, RouterOption, RouteConfig, PaymentParams, SharePayload, TTrackCustomParams} from './type'
+import type {RequestSubscribeMessage, AuthItem, AuthPhone, AuthLocation, MultiAuth, AuthUserInfo, PageChatOption, PageH5Option, PageProjectOption, PageProjectDetailOption, RouterOption, RouteConfig, PaymentParams, SharePayload, TTrackCustomParams, Metadata} from './type'
 
 export * from './type'
 
@@ -234,6 +234,13 @@ export class AistoreToolKit {
           hide_cancel: Number(authConfig.hideCancel)
         })
       }
+    })
+  }
+
+  updateMetaData(metadata: Metadata) {
+    this.postMessage({
+      type: 'metadata',
+      payload: metadata
     })
   }
   //# endregion
