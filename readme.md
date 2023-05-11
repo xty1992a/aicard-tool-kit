@@ -15,9 +15,21 @@ import { aistore, AuthItem, AuthType } from "@aistore/aicard-tool-kit";
 const tapPhone = () => {
   aistore.getPhoneNumber({
     callbackUrl: location.href,
-    required: false
+    required: false,
+    // 本动作触发的埋点补充参数
+    trackCustomParams: {
+      custom_params_id: 'h5应用的唯一标识（如5044）',
+      // 扩展参数，jsonstring
+      custom_params_value: JSON.stringify({
+        xxx: '',
+      })
+    }
   });
 };
+
 ```
-详细请见[demo](.)
-> 施工中
+详细请见[demo](https://git.myscrm.cn/2c-frontend/aistore-tool-sdk-h5)
+
+扫码体验：
+![](https://confluence.myscrm.cn/download/thumbnails/57036948/image2022-12-22_10-7-49.png?version=1&modificationDate=1671674869000&api=v2)
+![](https://confluence.myscrm.cn/download/thumbnails/57036948/image2022-12-22_10-7-59.png?version=1&modificationDate=1671674879000&api=v2)
