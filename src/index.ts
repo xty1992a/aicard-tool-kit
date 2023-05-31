@@ -1,6 +1,27 @@
-import {URLParams, toSearch, toUrlString, ensureUrlDecoded} from "./url-params";
-import {AuthType, YD_ATTRIBUTE} from './type'
-import type {RequestSubscribeMessage, AuthItem, AuthPhone, AuthLocation, MultiAuth, AuthUserInfo, PageChatOption, PageH5Option, PageProjectOption, PageProjectDetailOption, RouterOption, RouteConfig, PaymentParams, SharePayload, TTrackCustomParams} from './type'
+import {
+  URLParams,
+  toSearch,
+  toUrlString,
+  ensureUrlDecoded,
+} from './url-params'
+import { AuthType, YD_ATTRIBUTE } from './type'
+import type {
+  RequestSubscribeMessage,
+  AuthItem,
+  AuthPhone,
+  AuthLocation,
+  MultiAuth,
+  AuthUserInfo,
+  PageChatOption,
+  PageH5Option,
+  PageProjectOption,
+  PageProjectDetailOption,
+  RouterOption,
+  RouteConfig,
+  PaymentParams,
+  SharePayload,
+  TTrackCustomParams,
+} from './type'
 
 export * from './type'
 
@@ -11,23 +32,25 @@ export class AistoreToolKit {
    * */
   tcId = ''
   constructor() {
-    this.setEnable().catch(console.log);
+    this.setEnable().catch(console.log)
   }
   //# region 可用性
-  public enable = false;
+  public enable = false
   async setEnable() {
     async function enableCheck() {
       if (!window['wx']) {
-        return false;
+        return false
       }
-      const {miniprogram} = await new Promise<{ miniprogram: boolean }>(resolve => wx.miniProgram.getEnv(resolve));
-      return miniprogram;
+      const { miniprogram } = await new Promise<{ miniprogram: boolean }>(
+        (resolve) => wx.miniProgram.getEnv(resolve),
+      )
+      return miniprogram
     }
 
-    this.enable = await enableCheck();
+    this.enable = await enableCheck()
   }
   enableCheck() {
-    if (!this.enable) throw new Error('未提供window.wx或不在小程序环境');
+    if (!this.enable) throw new Error('请先初始化微信 jssdk')
   }
   //# endregion
 
@@ -42,28 +65,42 @@ export class AistoreToolKit {
   /**
    * @description 新的路由跳转方法，底层使用标准库的URL
    * */
-  protected goTo(option: { path: string, params?: Record<string, any> }, config: RouteConfig = {}) {
-    this.enableCheck();
+  protected goTo(
+    option: { path: string; params?: Record<string, any> },
+    config: RouteConfig = {},
+  ) {
+    this.enableCheck()
     const mini = wx.miniProgram
-    const _cfg = {...({redirect: false, isTab: false}), ...config}
-    const fn = _cfg.isTab ? mini.switchTab : _cfg.redirect ? mini.redirectTo : mini.navigateTo
+    const _cfg = { ...{ redirect: false, isTab: false }, ...config }
+    const fn = _cfg.isTab
+      ? mini.switchTab
+      : _cfg.redirect
+      ? mini.redirectTo
+      : mini.navigateTo
 
     fn({
-      url: this.stringifyPath(option, {old: false})
-    });
+      url: this.stringifyPath(option, { old: false }),
+    })
   }
 
   /**
    * 调整旧页面的方法，序列化参数的方式不同
    * */
-  protected goToOld(option: {path: string, params?: Record<string, any>}, config: RouteConfig = {redirect: false}) {
+  protected goToOld(
+    option: { path: string; params?: Record<string, any> },
+    config: RouteConfig = { redirect: false },
+  ) {
     this.enableCheck()
     const mini = wx.miniProgram
-    const _cfg = {...({redirect: false, isTab: false}), ...config}
-    const fn = _cfg.isTab ? mini.switchTab : _cfg.redirect ? mini.redirectTo : mini.navigateTo
+    const _cfg = { ...{ redirect: false, isTab: false }, ...config }
+    const fn = _cfg.isTab
+      ? mini.switchTab
+      : _cfg.redirect
+      ? mini.redirectTo
+      : mini.navigateTo
 
     fn({
-      url: this.stringifyPath(option, {old: true})
+      url: this.stringifyPath(option, { old: true }),
     })
   }
 
@@ -71,7 +108,10 @@ export class AistoreToolKit {
    * @description 序列化小程序路径
    * @param option
    * */
-  protected stringifyPath(option: {path: string, params?: Record<string, any>}, config: {old: boolean}) {
+  protected stringifyPath(
+    option: { path: string; params?: Record<string, any> },
+    config: { old: boolean },
+  ) {
     option.params = {
       ...(option.params || {}),
       tc_id: this.tcId,
@@ -88,7 +128,7 @@ export class AistoreToolKit {
    * */
   postMessage(data: Record<string, any>) {
     this.enableCheck()
-    wx.miniProgram.postMessage({data})
+    wx.miniProgram.postMessage({ data })
   }
 
   //# endregion
@@ -99,22 +139,25 @@ export class AistoreToolKit {
    * @param{PaymentParams} params 支付参数，以及回跳地址等
    * @param{RouteConfig} config 路由方法配置，决定以何种路由方法跳转
    * */
-  payment(params: PaymentParams, config: RouteConfig = {redirect: false}) {
-    const {callbackUrl: location, failedUrl, successUrl, ..._params} = params
+  payment(params: PaymentParams, config: RouteConfig = { redirect: false }) {
+    const { callbackUrl: location, failedUrl, successUrl, ..._params } = params
 
-    this.goToOld({
-      path: '/page/mainPage/pages/entry/main',
-      params: {
-        page_type: 'wxPay',
-        wxPayParams: {
-          ..._params,
-          ENV: 'H5',
-          location: ensureUrlDecoded(location),
-          failedUrl:failedUrl && ensureUrlDecoded(failedUrl),
-          successUrl:successUrl && ensureUrlDecoded(successUrl),
-        }
-      }
-    }, config)
+    this.goToOld(
+      {
+        path: '/page/mainPage/pages/entry/main',
+        params: {
+          page_type: 'wxPay',
+          wxPayParams: {
+            ..._params,
+            ENV: 'H5',
+            location: ensureUrlDecoded(location),
+            failedUrl: failedUrl && ensureUrlDecoded(failedUrl),
+            successUrl: successUrl && ensureUrlDecoded(successUrl),
+          },
+        },
+      },
+      config,
+    )
   }
   //# endregion
 
@@ -126,29 +169,42 @@ export class AistoreToolKit {
    * @param params 页面路由参数
    * @param config 路由方法配置，决定以何种路由方法跳转
    * */
-  routeTo(path: string, params: RouterOption & Record<string, string>, config: RouteConfig = {}) {
-    this.goTo({
-      path,
-      params
-    }, config)
+  routeTo(
+    path: string,
+    params: RouterOption & Record<string, string>,
+    config: RouteConfig = {},
+  ) {
+    this.goTo(
+      {
+        path,
+        params,
+      },
+      config,
+    )
   }
 
   /**
    * @description 路由到小程序首页
    * */
   routeToMain() {
-    this.goTo({
-      path: '/page/mainPage/pages/allHouseList/main',
-    }, {isTab: true})
+    this.goTo(
+      {
+        path: '/page/mainPage/pages/allHouseList/main',
+      },
+      { isTab: true },
+    )
   }
 
   /**
    * @description 路由到小程序个人中心
    * */
   routeToMine() {
-    this.goTo({
-      path: '/page/mainPage/pages/my/main',
-    }, {isTab: true})
+    this.goTo(
+      {
+        path: '/page/mainPage/pages/my/main',
+      },
+      { isTab: true },
+    )
   }
 
   /**
@@ -156,12 +212,15 @@ export class AistoreToolKit {
    * @param{PageProjectOption} params 页面参数
    * */
   routeToProjectList(params?: PageProjectOption) {
-    this.goTo({
-      path: '/page/mainPage/pages/projectList/main',
-      params: {
-        yd_attribute: params?.attribute || YD_ATTRIBUTE.sale,
-      }
-    }, {isTab: true})
+    this.goTo(
+      {
+        path: '/page/mainPage/pages/projectList/main',
+        params: {
+          yd_attribute: params?.attribute || YD_ATTRIBUTE.sale,
+        },
+      },
+      { isTab: true },
+    )
   }
 
   /**
@@ -169,15 +228,21 @@ export class AistoreToolKit {
    * @param{RouterOption & PageProjectDetailOption} params 页面参数
    * @param{RouteConfig} config 路由配置
    * */
-  routeToProjectDetail(params: RouterOption & PageProjectDetailOption, config?:RouteConfig) {
-    this.goTo({
-      path: '/subpackages/independent/project/main/index',
-      params: {
-        ...params,
-        yk_project_id: params.id,
-        yd_attribute: params.attribute || YD_ATTRIBUTE.sale,
-      }
-    }, config)
+  routeToProjectDetail(
+    params: RouterOption & PageProjectDetailOption,
+    config?: RouteConfig,
+  ) {
+    this.goTo(
+      {
+        path: '/subpackages/independent/project/main/index',
+        params: {
+          ...params,
+          yk_project_id: params.id,
+          yd_attribute: params.attribute || YD_ATTRIBUTE.sale,
+        },
+      },
+      config,
+    )
   }
 
   /**
@@ -186,13 +251,16 @@ export class AistoreToolKit {
    * @param{RouteConfig} config 路由配置
    * */
   routeToH5(params: RouterOption & PageH5Option, config?: RouteConfig) {
-    this.goTo({
-      path: '/page/mainPage/pages/h5/index',
-      params: {
-        ...params,
-        url: ensureUrlDecoded(params.url),
-      }
-    }, config)
+    this.goTo(
+      {
+        path: '/page/mainPage/pages/h5/index',
+        params: {
+          ...params,
+          url: ensureUrlDecoded(params.url),
+        },
+      },
+      config,
+    )
   }
 
   /**
@@ -201,13 +269,16 @@ export class AistoreToolKit {
    * @param{RouteConfig} config 路由配置
    * */
   routeToChat(params: RouterOption & PageChatOption, config?: RouteConfig) {
-    this.goTo({
-      path: '/subpackages/im/chat/index',
-      params: {
-        ...params,
-        isUserEnd: '1',
-      }
-    }, config)
+    this.goTo(
+      {
+        path: '/subpackages/im/chat/index',
+        params: {
+          ...params,
+          isUserEnd: '1',
+        },
+      },
+      config,
+    )
   }
   //# endregion
 
@@ -218,7 +289,15 @@ export class AistoreToolKit {
    * @param{SharePayload} params 分享参数
    * */
   updateShare(params: SharePayload) {
-    const {url, imageUrl, params: _params, title, path, authConfig, trackCustomParams} = params
+    const {
+      url,
+      imageUrl,
+      params: _params,
+      title,
+      path,
+      authConfig,
+      trackCustomParams,
+    } = params
     this.postMessage({
       type: 'share',
       payload: {
@@ -229,11 +308,13 @@ export class AistoreToolKit {
         params: _params,
         track_custom_params: trackCustomParams,
         tc_id: this.tcId,
-        auth_config: authConfig && toUrlString({
-          auth_list: authConfig.authList,
-          hide_cancel: Number(authConfig.hideCancel)
-        })
-      }
+        auth_config:
+          authConfig &&
+          toUrlString({
+            auth_list: authConfig.authList,
+            hide_cancel: Number(authConfig.hideCancel),
+          }),
+      },
     })
   }
   //# endregion
@@ -245,17 +326,25 @@ export class AistoreToolKit {
    * @param{RouteConfig} config 路由配置
    * @return void 成功回跳后ticket更新
    * */
-  getUserInfo(params: Omit<AuthUserInfo, 'type'>, config: RouteConfig = {redirect: false}) {
-    const {callbackUrl, trackCustomParams, ...option} = params
+  getUserInfo(
+    params: Omit<AuthUserInfo, 'type'>,
+    config: RouteConfig = { redirect: false },
+  ) {
+    const { callbackUrl, trackCustomParams, ...option } = params
 
-    this.doAuth({
-      authList: [{
-        type: AuthType.GET_USER_INFO,
-        ...option
-      }],
-      trackCustomParams,
-      callbackUrl
-    }, config);
+    this.doAuth(
+      {
+        authList: [
+          {
+            type: AuthType.GET_USER_INFO,
+            ...option,
+          },
+        ],
+        trackCustomParams,
+        callbackUrl,
+      },
+      config,
+    )
   }
 
   /**
@@ -264,17 +353,22 @@ export class AistoreToolKit {
    * @param{RouteConfig} config 路由配置
    * @return void 成功回跳后ticket更新
    * */
-  getPhoneNumber(params: Omit<AuthPhone, 'type'>, config: RouteConfig = {redirect: false}) {
-    const {callbackUrl, trackCustomParams,...option} = params
+  getPhoneNumber(
+    params: Omit<AuthPhone, 'type'>,
+    config: RouteConfig = { redirect: false },
+  ) {
+    const { callbackUrl, trackCustomParams, ...option } = params
 
     this.doAuth({
-      authList: [{
-        type: AuthType.GET_PHONE_NUMBER,
-        ...option
-      }],
+      authList: [
+        {
+          type: AuthType.GET_PHONE_NUMBER,
+          ...option,
+        },
+      ],
       trackCustomParams,
-      callbackUrl
-    });
+      callbackUrl,
+    })
   }
   /**
    * @description 获取小程序定位
@@ -282,17 +376,22 @@ export class AistoreToolKit {
    * @param{RouteConfig} config 路由配置
    * @return void 成功回跳后ticket更新
    * */
-  getLocation(params: Omit<AuthLocation, 'type'>, config: RouteConfig = {redirect: false}) {
-    const {callbackUrl, trackCustomParams, ...option} = params
+  getLocation(
+    params: Omit<AuthLocation, 'type'>,
+    config: RouteConfig = { redirect: false },
+  ) {
+    const { callbackUrl, trackCustomParams, ...option } = params
 
     this.doAuth({
-      authList: [{
-        type: AuthType.GET_LOCATION,
-        ...option
-      }],
+      authList: [
+        {
+          type: AuthType.GET_LOCATION,
+          ...option,
+        },
+      ],
       trackCustomParams,
-      callbackUrl
-    });
+      callbackUrl,
+    })
   }
 
   /**
@@ -301,16 +400,21 @@ export class AistoreToolKit {
    * @param{RouteConfig} config 路由配置
    * @return void 成功回跳后ticket更新
    * */
-  requestSubscribeMessage(params: Omit<RequestSubscribeMessage, 'type'>, config: RouteConfig = {redirect: false}) {
-    const {callbackUrl, trackCustomParams, ...option} = params
+  requestSubscribeMessage(
+    params: Omit<RequestSubscribeMessage, 'type'>,
+    config: RouteConfig = { redirect: false },
+  ) {
+    const { callbackUrl, trackCustomParams, ...option } = params
     this.doAuth({
-      authList: [{
-        type: AuthType.GET_NEWS_SUBSCRIBE,
-        ...option
-      }],
+      authList: [
+        {
+          type: AuthType.GET_NEWS_SUBSCRIBE,
+          ...option,
+        },
+      ],
       trackCustomParams,
-      callbackUrl
-    });
+      callbackUrl,
+    })
   }
 
   /**
@@ -319,27 +423,39 @@ export class AistoreToolKit {
    * @param{RouteConfig} config 路由配置
    * @return void 成功回跳后ticket更新
    * */
-  multiAuth(params: MultiAuth, config: RouteConfig = {redirect: false}) {
+  multiAuth(params: MultiAuth, config: RouteConfig = { redirect: false }) {
     this.doAuth(params, config)
   }
 
   /**
    * @description 底层授权方法
    * */
-  protected doAuth(option: { authList: AuthItem[], callbackUrl: string, trackCustomParams?: TTrackCustomParams }, config: RouteConfig = {redirect: false}) {
-    this.goTo({
-      path: '/subpackages/independent/bind_user_msg/h5_ability/index',
-      params: {
-        // 转为snake_case
-        auth_list: option.authList.map(it => ({...it, required: Boolean(it.required)})),
-        callback_url: ensureUrlDecoded(option.callbackUrl),
-        track_custom_params: option.trackCustomParams
-      }
-    }, config)
+  protected doAuth(
+    option: {
+      authList: AuthItem[]
+      callbackUrl: string
+      trackCustomParams?: TTrackCustomParams
+    },
+    config: RouteConfig = { redirect: false },
+  ) {
+    this.goTo(
+      {
+        path: '/subpackages/independent/bind_user_msg/h5_ability/index',
+        params: {
+          // 转为snake_case
+          auth_list: option.authList.map((it) => ({
+            ...it,
+            required: Boolean(it.required),
+          })),
+          callback_url: ensureUrlDecoded(option.callbackUrl),
+          track_custom_params: option.trackCustomParams,
+        },
+      },
+      config,
+    )
   }
 
   //# endregion
 }
 
 export const aistore = new AistoreToolKit()
-

@@ -15,7 +15,7 @@ type Many<T> = T | T[]
  * */
 export interface AuthItem {
   /** 授权类型 */
-  type: AuthType,
+  type: AuthType
   /** 是否强制授权(置为true则不可跳过) */
   required?: boolean
   /** 可能存在的载荷，如模板id */
@@ -37,22 +37,24 @@ export type CommonPayload = {
   trackCustomParams?: TTrackCustomParams
 }
 
-export type AuthPhone = CommonPayload & AuthItem & {
-  type: AuthType.GET_PHONE_NUMBER,
-  payload?: {
-    /** 留电前，混入到entry_params的参数（此字段为云店内部字段） */
-    entry_params: Record<string, string>
+export type AuthPhone = CommonPayload &
+  AuthItem & {
+    type: AuthType.GET_PHONE_NUMBER
+    payload?: {
+      /** 留电前，混入到entry_params的参数（此字段为云店内部字段） */
+      entry_params: Record<string, string>
+    }
   }
-}
 
-export type AuthUserInfo = CommonPayload & AuthItem & {
-  type: AuthType.GET_USER_INFO
-}
+export type AuthUserInfo = CommonPayload &
+  AuthItem & {
+    type: AuthType.GET_USER_INFO
+  }
 
-export type AuthLocation = CommonPayload & AuthItem & {
-  type: AuthType.GET_LOCATION
-}
-
+export type AuthLocation = CommonPayload &
+  AuthItem & {
+    type: AuthType.GET_LOCATION
+  }
 
 export interface SubscribeMessagePayload {
   /**
@@ -67,13 +69,14 @@ export interface SubscribeMessagePayload {
  * 模板消息订阅参数
  * payload.msg_ids必传
  * */
-export type RequestSubscribeMessage = CommonPayload & AuthItem & {
-  type: AuthType.GET_NEWS_SUBSCRIBE,
-  callbackUrl: string
-  payload: SubscribeMessagePayload
-}
+export type RequestSubscribeMessage = CommonPayload &
+  AuthItem & {
+    type: AuthType.GET_NEWS_SUBSCRIBE
+    callbackUrl: string
+    payload: SubscribeMessagePayload
+  }
 
-export type MultiAuth = CommonPayload &  {
+export type MultiAuth = CommonPayload & {
   authList: Pick<AuthItem, 'type' | 'required' | 'payload'>[]
 }
 
@@ -85,10 +88,10 @@ export interface SharePayload {
   url: string
 
   /** 分享标题 */
-  title?: string,
+  title?: string
 
   /** 分享背景 */
-  imageUrl?: string,
+  imageUrl?: string
 
   /** 小程序参数 */
   params?: Record<string, any>
@@ -103,7 +106,7 @@ export interface SharePayload {
   }
 
   /** 小程序路径，一般不填，用于指定落地非h5的分享 */
-  path?: string;
+  path?: string
 }
 
 /**
@@ -137,7 +140,7 @@ export interface PaymentParams {
  * */
 export interface RouteOption {
   /** 小程序页面路径 */
-  path: string,
+  path: string
   /** 小程序页面参数 */
   params?: Record<string, any>
 }
@@ -165,7 +168,7 @@ export interface RouterOption {
  * */
 export enum YD_ATTRIBUTE {
   sale = 'sale',
-  rent = 'rent'
+  rent = 'rent',
 }
 
 export interface PageProjectOption {
