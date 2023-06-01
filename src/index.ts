@@ -29,15 +29,42 @@ export class AistoreToolKit {
   /**
    * tc-id,h5的会话标识，应该由小程序的tc-id转化而来，请对接人链
    * 本sdk只做透传
-   * */
+   */
   tcId = ''
   constructor() {
+    this.handleLegacy()
     this.setEnable().catch(console.log)
   }
-  //# region 可用性
+  //#region 兼容处理
+  /**
+   * 兼容处理云店 webview1.0 页面加载了对接 aicard-tool-kit h5 页面
+   */
+  private handleLegacy() {
+    if (!/ai_webview_legacy/g.test(location.search)) return
+
+    // 将关键字删除, 避免循环跳转
+    const url = encodeURIComponent(
+      location.href
+        .replace(/&?ai_webview_legacy=.*?(?=(&|$))/, '')
+        .replace(/\?\&/, '?'),
+    )
+    this.goTo(
+      {
+        path: '/page/mainPage/pages/h5/index',
+        params: { url },
+      },
+      { redirect: true, isTab: false },
+    )
+  }
+  //#endregion
+
+  //#region 可用性
   public enable = false
   async setEnable() {
     async function enableCheck() {
+      if (this.enable) {
+        return true
+      }
       if (!window['wx']) {
         return false
       }
@@ -49,27 +76,28 @@ export class AistoreToolKit {
 
     this.enable = await enableCheck()
   }
-  enableCheck() {
-    if (!this.enable) throw new Error('请先初始化微信 jssdk')
+  async enableCheck() {
+    await this.setEnable()
+    if (!this.enable) throw new Error('请先初始化微信jssdk')
   }
-  //# endregion
+  //#endregion
 
-  //# region 基础
+  //#region 基础
   /**
    * @description 将h5自身的tc-id（来自小程序的tc-id生成），给到toolkit，后续行为都将携带此id
-   * */
+   */
   setTcId(tcId: string) {
     this.tcId = tcId
   }
 
   /**
    * @description 新的路由跳转方法，底层使用标准库的URL
-   * */
-  protected goTo(
+   */
+  protected async goTo(
     option: { path: string; params?: Record<string, any> },
     config: RouteConfig = {},
   ) {
-    this.enableCheck()
+    await this.enableCheck()
     const mini = wx.miniProgram
     const _cfg = { ...{ redirect: false, isTab: false }, ...config }
     const fn = _cfg.isTab
@@ -85,12 +113,12 @@ export class AistoreToolKit {
 
   /**
    * 调整旧页面的方法，序列化参数的方式不同
-   * */
-  protected goToOld(
+   */
+  protected async goToOld(
     option: { path: string; params?: Record<string, any> },
     config: RouteConfig = { redirect: false },
   ) {
-    this.enableCheck()
+    await this.enableCheck()
     const mini = wx.miniProgram
     const _cfg = { ...{ redirect: false, isTab: false }, ...config }
     const fn = _cfg.isTab
@@ -107,7 +135,7 @@ export class AistoreToolKit {
   /**
    * @description 序列化小程序路径
    * @param option
-   * */
+   */
   protected stringifyPath(
     option: { path: string; params?: Record<string, any> },
     config: { old: boolean },
@@ -125,20 +153,20 @@ export class AistoreToolKit {
   /**
    * @description 与小程序通信（非实时，仅跳转，分享等场景批量派发）
    * @param{Record<string, any>} data 传给小程序的数据
-   * */
-  postMessage(data: Record<string, any>) {
-    this.enableCheck()
+   */
+  async postMessage(data: Record<string, any>) {
+    await this.enableCheck()
     wx.miniProgram.postMessage({ data })
   }
 
-  //# endregion
+  //#endregion
 
-  //# region 支付
+  //#region 支付
   /**
    * @description 跳转到支付页
    * @param{PaymentParams} params 支付参数，以及回跳地址等
    * @param{RouteConfig} config 路由方法配置，决定以何种路由方法跳转
-   * */
+   */
   payment(params: PaymentParams, config: RouteConfig = { redirect: false }) {
     const { callbackUrl: location, failedUrl, successUrl, ..._params } = params
 
@@ -159,16 +187,15 @@ export class AistoreToolKit {
       config,
     )
   }
-  //# endregion
+  //#endregion
 
-  //# region 路由
-
+  //#region 路由
   /**
    * @description 路由到任意小程序页面
    * @param path 小程序完整路径 / 开头
    * @param params 页面路由参数
    * @param config 路由方法配置，决定以何种路由方法跳转
-   * */
+   */
   routeTo(
     path: string,
     params: RouterOption & Record<string, string>,
@@ -185,7 +212,7 @@ export class AistoreToolKit {
 
   /**
    * @description 路由到小程序首页
-   * */
+   */
   routeToMain() {
     this.goTo(
       {
@@ -197,7 +224,7 @@ export class AistoreToolKit {
 
   /**
    * @description 路由到小程序个人中心
-   * */
+   */
   routeToMine() {
     this.goTo(
       {
@@ -210,7 +237,7 @@ export class AistoreToolKit {
   /**
    * @description 路由到小程序项目列表页
    * @param{PageProjectOption} params 页面参数
-   * */
+   */
   routeToProjectList(params?: PageProjectOption) {
     this.goTo(
       {
@@ -227,7 +254,7 @@ export class AistoreToolKit {
    * @description 路由到小程序项目详情
    * @param{RouterOption & PageProjectDetailOption} params 页面参数
    * @param{RouteConfig} config 路由配置
-   * */
+   */
   routeToProjectDetail(
     params: RouterOption & PageProjectDetailOption,
     config?: RouteConfig,
@@ -249,7 +276,7 @@ export class AistoreToolKit {
    * @description 路由到另一个h5，一般情况下，建议直接location.href跳过去
    * @param{RouterOption & {url: string}} params 页面参数
    * @param{RouteConfig} config 路由配置
-   * */
+   */
   routeToH5(params: RouterOption & PageH5Option, config?: RouteConfig) {
     this.goTo(
       {
@@ -267,7 +294,7 @@ export class AistoreToolKit {
    * @description 路由到洽谈室
    * @param{RouterOption & {url: string}} params 页面参数
    * @param{RouteConfig} config 路由配置
-   * */
+   */
   routeToChat(params: RouterOption & PageChatOption, config?: RouteConfig) {
     this.goTo(
       {
@@ -280,14 +307,13 @@ export class AistoreToolKit {
       config,
     )
   }
-  //# endregion
+  //#endregion
 
-  //# region 分享
-
+  //#region 分享
   /**
    * @description 更新分享参数，⚠️⚠️⚠️注意此方法不能直接分享，还需要引导用户右上角分享
    * @param{SharePayload} params 分享参数
-   * */
+   */
   updateShare(params: SharePayload) {
     const {
       url,
@@ -317,15 +343,15 @@ export class AistoreToolKit {
       },
     })
   }
-  //# endregion
+  //#endregion
 
-  //# region 授权
+  //#region 授权
   /**
    * @description 获取小程序用户信息
    * @param{Omit<AuthUserInfo, 'type'>} params 授权参数
    * @param{RouteConfig} config 路由配置
    * @return void 成功回跳后ticket更新
-   * */
+   */
   getUserInfo(
     params: Omit<AuthUserInfo, 'type'>,
     config: RouteConfig = { redirect: false },
@@ -352,7 +378,7 @@ export class AistoreToolKit {
    * @param{Omit<AuthPhone, 'type'>} params 授权参数
    * @param{RouteConfig} config 路由配置
    * @return void 成功回跳后ticket更新
-   * */
+   */
   getPhoneNumber(
     params: Omit<AuthPhone, 'type'>,
     config: RouteConfig = { redirect: false },
@@ -370,12 +396,13 @@ export class AistoreToolKit {
       callbackUrl,
     })
   }
+
   /**
    * @description 获取小程序定位
    * @param{Omit<AuthLocation, 'type'>} params 授权参数
    * @param{RouteConfig} config 路由配置
    * @return void 成功回跳后ticket更新
-   * */
+   */
   getLocation(
     params: Omit<AuthLocation, 'type'>,
     config: RouteConfig = { redirect: false },
@@ -399,7 +426,7 @@ export class AistoreToolKit {
    * @param{Omit<RequestSubscribeMessage, 'type'>} params 授权参数,必须提供模板消息id,最多3条
    * @param{RouteConfig} config 路由配置
    * @return void 成功回跳后ticket更新
-   * */
+   */
   requestSubscribeMessage(
     params: Omit<RequestSubscribeMessage, 'type'>,
     config: RouteConfig = { redirect: false },
@@ -422,14 +449,14 @@ export class AistoreToolKit {
    * @param{MultiAuth} params 授权参数列表，同单个授权参数,已满足的权限将直接跳过
    * @param{RouteConfig} config 路由配置
    * @return void 成功回跳后ticket更新
-   * */
+   */
   multiAuth(params: MultiAuth, config: RouteConfig = { redirect: false }) {
     this.doAuth(params, config)
   }
 
   /**
    * @description 底层授权方法
-   * */
+   */
   protected doAuth(
     option: {
       authList: AuthItem[]
@@ -455,7 +482,7 @@ export class AistoreToolKit {
     )
   }
 
-  //# endregion
+  //#endregion
 }
 
 export const aistore = new AistoreToolKit()
