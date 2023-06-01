@@ -187,3 +187,9 @@ export interface PageChatOption {
   seller_id: string
   [p: string]: string
 }
+
+export interface Metadata{
+  title: string
+  desc?: string
+  [p: string]: string
+}

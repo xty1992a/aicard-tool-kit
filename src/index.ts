@@ -21,6 +21,7 @@ import type {
   PaymentParams,
   SharePayload,
   TTrackCustomParams,
+  Metadata
 } from './type'
 
 export * from './type'
@@ -341,6 +342,13 @@ export class AistoreToolKit {
             hide_cancel: Number(authConfig.hideCancel),
           }),
       },
+    })
+  }
+
+  updateMetaData(metadata: Metadata) {
+    this.postMessage({
+      type: 'metadata',
+      payload: metadata
     })
   }
   //#endregion
