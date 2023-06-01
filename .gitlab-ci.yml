@@ -1,0 +1,21 @@
+stages:
+  - publish
+
+publish:
+  stage: publish
+  image: yunke-registry.cn-hangzhou.cr.aliyuncs.com/yued/node-image-base:v16.20.0-alpine-rc
+  environment:
+    name: NODE_AUTH_TOKEN
+    NODE_AUTH_TOKEN: $NPM_AUTH_CONTENT
+  script:
+    - echo -e $NPM_AUTH_CONTENT >> ~/.npmrc
+    - pnpm install
+    - pnpm run build
+    - npm publish --access public
+    #    - pnpm install -g --no-frozen-lockfile
+    #    - pnpm install -g @microsoft/rush@5.97.0
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "test"'
+      changes:
+        - common/changes/**/*
+      when: always
