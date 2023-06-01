@@ -74,7 +74,7 @@ export class AistoreToolKit {
       return miniprogram
     }
 
-    this.enable = await enableCheck()
+    this.enable = await enableCheck.call(this)
   }
   async enableCheck() {
     await this.setEnable()
